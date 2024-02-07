@@ -7,12 +7,13 @@ import (
 )
 
 type Bot struct {
-	bot    *tgbotapi.BotAPI
-	pocket *pocket.Client
+	bot      *tgbotapi.BotAPI
+	pocket   *pocket.Client
+	redirect string
 }
 
-func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocket.Client) *Bot {
-	return &Bot{bot: bot}
+func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocket.Client, redirect string) *Bot {
+	return &Bot{bot: bot, pocket: pocketClient, redirect: redirect}
 }
 
 func (b *Bot) Start() error {

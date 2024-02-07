@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NikitaYurchyk/TGPocket/pkg/telegram"
+	"github.com/zhashkevych/go-pocket-sdk"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -14,8 +15,12 @@ func main() {
 	}
 
 	bot.Debug = true
+	pocketClient, err := pocket.NewClient("110418-0db4c582cf23e23fcfa354a")
+	if err != nil {
+		log.Panic(err)
+	}
 
-	tgBot := telegram.NewBot(bot)
+	tgBot := telegram.NewBot(bot, pocketClient, "http://localhost")
 	err = tgBot.Start()
 	if err != nil {
 		log.Fatal(err)
