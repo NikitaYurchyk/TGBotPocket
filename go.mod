@@ -1,5 +1,6 @@
 module github.com/NikitaYurchyk/TGPocket
 
+
 go 1.21.6
 
 require (
