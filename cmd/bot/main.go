@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NikitaYurchyk/TGPocket/pkg/repository"
 	"github.com/NikitaYurchyk/TGPocket/pkg/repository/bolt"
+	"github.com/NikitaYurchyk/TGPocket/pkg/server"
 	"github.com/NikitaYurchyk/TGPocket/pkg/telegram"
 	"github.com/zhashkevych/go-pocket-sdk"
 	"go.etcd.io/bbolt"
@@ -42,9 +43,14 @@ func main() {
 	tr := bolt.NewTokenRepository(db)
 
 	tgBot := telegram.NewBot(bot, pocketClient, "http://localhost", tr)
-	err = tgBot.Start()
-	if err != nil {
+	authServer := server.InitAuthServer(pocketClient, tr, "https://t.me/TGPocketProjectBot")
+	go func() {
+		err = tgBot.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	if err := authServer.Start(); err != nil {
 		log.Fatal(err)
 	}
-
 }
