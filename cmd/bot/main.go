@@ -48,7 +48,7 @@ func main() {
 
 	tr := bolt.NewTokenRepository(db)
 
-	tgBot := telegram.NewBot(bot, pocketClient, "http://localhost", tr)
+	tgBot := telegram.NewBot(bot, pocketClient, "https://t.me/TGPocketProjectBot", tr)
 	authServer := server.InitAuthServer(pocketClient, tr, "https://t.me/TGPocketProjectBot")
 	go func() {
 		err = tgBot.Start()

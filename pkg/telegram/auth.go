@@ -21,5 +21,8 @@ func (b *Bot) generateAuthLink(chatId int64) (string, error) {
 }
 
 func (b *Bot) generateRedirectURL(chatID int64, redirectURL string) string {
+	fmt.Println("START")
+	fmt.Printf("%s?chat_id=%d\n", redirectURL, chatID)
+	fmt.Println("OVER")
 	return fmt.Sprintf("%s?chat_id=%d", redirectURL, chatID)
 }
