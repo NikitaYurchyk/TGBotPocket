@@ -1,8 +1,11 @@
 package main
 
 import (
+	"github.com/NikitaYurchyk/TGPocket/pkg/repository"
+	"github.com/NikitaYurchyk/TGPocket/pkg/repository/bolt"
 	"github.com/NikitaYurchyk/TGPocket/pkg/telegram"
 	"github.com/zhashkevych/go-pocket-sdk"
+	"go.etcd.io/bbolt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -19,8 +22,26 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+	db, err := bbolt.Open("bot.db", 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	tgBot := telegram.NewBot(bot, pocketClient, "http://localhost")
+	_ = db.Update(func(tx *bbolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte(repository.AccessTokens))
+		if err != nil {
+			return err
+		}
+		_, err = tx.CreateBucketIfNotExists([]byte(repository.AccessTokens))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	tr := bolt.NewTokenRepository(db)
+
+	tgBot := telegram.NewBot(bot, pocketClient, "http://localhost", tr)
 	err = tgBot.Start()
 	if err != nil {
 		log.Fatal(err)

@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"github.com/NikitaYurchyk/TGPocket/pkg/repository"
 )
 
 func (b *Bot) generateAuthLink(chatId int64) (string, error) {
@@ -11,6 +12,11 @@ func (b *Bot) generateAuthLink(chatId int64) (string, error) {
 	if err != nil {
 		return "Error", err
 	}
+
+	if err := b.tokenRepo.Save(chatId, requestToken, repository.RequestTokens); err != nil {
+		return "", err
+	}
+
 	return b.pocket.GetAuthorizationURL(requestToken, redirectID)
 }
 
