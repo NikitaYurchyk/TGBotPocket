@@ -3,8 +3,8 @@ package repository
 type Bucket string
 
 const (
-	AccessTokens  Bucket = "access_token"
-	RequestTokens Bucket = "request_token"
+	AccessTokens  Bucket = "access_tokens"
+	RequestTokens Bucket = "request_tokens"
 )
 
 type TokenRepository interface {
