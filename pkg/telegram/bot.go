@@ -2,20 +2,25 @@ package telegram
 
 import (
 	"github.com/NikitaYurchyk/TGPocket/pkg/repository"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/zhashkevych/go-pocket-sdk"
 	"log"
 )
 
 type Bot struct {
-	bot       *tgbotapi.BotAPI
-	pocket    *pocket.Client
-	redirect  string
-	tokenRepo repository.TokenRepository
+	bot         *tgbotapi.BotAPI
+	pocket      *pocket.Client
+	redirectURL string
+	tokenRepo   repository.TokenRepo
 }
 
-func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocket.Client, redirect string, tokenRepo repository.TokenRepository) *Bot {
-	return &Bot{bot: bot, pocket: pocketClient, redirect: redirect, tokenRepo: tokenRepo}
+func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocket.Client, redirectURL string, tokenRepo repository.TokenRepo) *Bot {
+	return &Bot{
+		bot:         bot,
+		pocket:      pocketClient,
+		redirectURL: redirectURL,
+		tokenRepo:   tokenRepo,
+	}
 }
 
 func (b *Bot) Start() error {
@@ -24,26 +29,20 @@ func (b *Bot) Start() error {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, _ := b.initUpdatesChan()
-	b.handleUpdates(updates)
-	return nil
-}
+	updates, _ := b.bot.GetUpdatesChan(u)
 
-func (b *Bot) initUpdatesChan() (tgbotapi.UpdatesChannel, error) {
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	return b.bot.GetUpdatesChan(u), nil
-}
-
-func (b *Bot) handleUpdates(updates tgbotapi.UpdatesChannel) {
 	for update := range updates {
-		if update.Message != nil { // If we got a message
-			if update.Message.IsCommand() {
-				b.handleCommand(update.Message)
-				continue
-			}
-			b.handleMsg(update.Message)
-
+		if update.Message == nil { // ignore any non-Message Updates
+			continue
 		}
+
+		if update.Message.IsCommand() {
+			b.handleCommand(update.Message)
+			continue
+		}
+
+		b.handleMsg(update.Message)
 	}
+
+	return nil
 }

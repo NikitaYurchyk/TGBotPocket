@@ -2,19 +2,19 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/NikitaYurchyk/TGPocket/pkg/repository"
-	"github.com/NikitaYurchyk/TGPocket/pkg/repository/bolt"
+	"github.com/NikitaYurchyk/TGPocket/pkg/repository/db_bolt"
 	"github.com/NikitaYurchyk/TGPocket/pkg/server"
 	"github.com/NikitaYurchyk/TGPocket/pkg/telegram"
+	"github.com/boltdb/bolt"
 	"github.com/zhashkevych/go-pocket-sdk"
-	"go.etcd.io/bbolt"
 	"log"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
+
 	bot, err := tgbotapi.NewBotAPI("6984649114:AAGcKYIfSrVh23QZeUQxfCz7iVuW2ZjPWL8")
 	if err != nil {
 		log.Panic(err)
@@ -26,12 +26,12 @@ func main() {
 		log.Panic(err)
 	}
 
-	db, err := bbolt.Open("bot.db", 0600, nil)
+	db, err := bolt.Open("bot.db", 0777, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.Batch(func(tx *bbolt.Tx) error {
+	err = db.Batch(func(tx *bolt.Tx) error {
 		_, err = tx.CreateBucketIfNotExists([]byte(repository.AccessTokens))
 		if err != nil {
 			return errors.New("\nACCESS-BATCH NOT CREATED!\n")
@@ -43,20 +43,19 @@ func main() {
 		return nil
 	})
 
-	tr := bolt.NewTokenRepository(db)
+	tr := db_bolt.NewTokenStorage(db)
 
-	tgBot := telegram.NewBot(bot, pocketClient, "https://t.me/TGPocketProjectBot", tr)
-	authServer := server.InitAuthServer(pocketClient, tr, "https://t.me/TGPocketProjectBot")
+	tgBot := telegram.NewBot(bot, pocketClient, "http://localhost/", tr)
+	redirServer := server.NewAuthServer("https://t.me/TGPocketProjectBot", tr, pocketClient)
 
 	go func() {
-		err = tgBot.Start()
+		err = redirServer.Start()
 		if err != nil {
-			fmt.Println("here")
 			log.Fatal(err)
 		}
 	}()
 
-	if err := authServer.Start(); err != nil {
+	if err := tgBot.Start(); err != nil {
 		log.Fatal(err)
 	}
 }
