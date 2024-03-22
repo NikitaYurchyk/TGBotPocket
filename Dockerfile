@@ -1,6 +1,7 @@
 FROM golang:1.21.6-alpine AS builder
 
 COPY . /github.com/NikitaYurchyk/TGPocket/
+
 WORKDIR /github.com/NikitaYurchyk/TGPocket/
 
 RUN go mod download
@@ -12,7 +13,8 @@ WORKDIR /root/
 
 COPY --from=builder /github.com/NikitaYurchyk/TGPocket/bin/bot .
 
+COPY .env .
+
 EXPOSE 80
 
 CMD ["./bot"]
-

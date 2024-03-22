@@ -7,21 +7,27 @@ import (
 	"github.com/NikitaYurchyk/TGPocket/pkg/server"
 	"github.com/NikitaYurchyk/TGPocket/pkg/telegram"
 	"github.com/boltdb/bolt"
+	"github.com/joho/godotenv"
 	"github.com/zhashkevych/go-pocket-sdk"
 	"log"
+	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
+	err := godotenv.Load("./.env")
 
-	bot, err := tgbotapi.NewBotAPI("6984649114:AAGcKYIfSrVh23QZeUQxfCz7iVuW2ZjPWL8")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("TOKEN"))
 	if err != nil {
 		log.Panic(err)
 	}
-
 	bot.Debug = true
-	pocketClient, err := pocket.NewClient("110418-0db4c582cf23e23fcfa354a")
+	pocketClient, err := pocket.NewClient(os.Getenv("CONSUMER_KEY"))
 	if err != nil {
 		log.Panic(err)
 	}

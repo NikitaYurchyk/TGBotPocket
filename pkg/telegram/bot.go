@@ -32,16 +32,22 @@ func (b *Bot) Start() error {
 	updates, _ := b.bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
+		if update.Message == nil {
 			continue
 		}
 
 		if update.Message.IsCommand() {
-			b.handleCommand(update.Message)
+			err := b.handleCommand(update.Message)
+			if err != nil {
+				return err
+			}
 			continue
 		}
 
-		b.handleMsg(update.Message)
+		err := b.handleMsg(update.Message)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
